@@ -10,7 +10,7 @@ let habits = [
     { id: 4, task: "Walk 5000 steps", description: "Take a walk", completed: false, streak: 0 }
 ];
 
-let nextId = 5;
+let nextId = 6;
 
 // ==================================== dashboard.ejs
 app.get('/', (req, res) => {
