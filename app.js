@@ -3,20 +3,12 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 
-let habits = [
-    { id: 1, task: "Drink 2L water", description: "Drink 8 glasses", completed: true, streak: 5 },
-    { id: 2, task: "Read for 20 mins", description: "Any book", completed: false, streak: 2 },
-    { id: 3, task: "10 min meditation", description: "Use calm app", completed: true, streak: 3 },
-    { id: 4, task: "Walk 5000 steps", description: "Take a walk", completed: false, streak: 0 }
-];
+let habits = [];
+let nextId = 1;
 
-let nextId = 6;
-
-// ==================================== dashboard.ejs
+// ==================================== home.ejs
 app.get('/', (req, res) => {
-    const Count = habits.filter(h => h.completed).length;
-    const progress = Math.round((Count / habits.length) * 100);
-    res.render('dashboard', { habits, progress, Count });
+    res.render('home', { habits });
 });
 
 //  ==================================== add.ejs
@@ -24,30 +16,57 @@ app.get('/add', (req, res) => {
     res.render('add');
 });
 
+// add 
 app.post('/add', (req, res) => {
-    const { task, description, date } = req.body;
-
-    const New = {
-        id: newId++,      
-        task: task,
-        description: description,
-        date: date
+    const { name } = req.body;
+    const newHabit = {
+        id: nextId++,
+        name: name,
+        completed: false
     };
-    
-    habits.push(New);
+    habits.push(newHabit);
     res.redirect('/');
 });
 
-// ==================================== manage.ejs
-app.get('/manage', (req, res) => {
-    res.render('manage', { habits });
+// done habit
+app.get('/habit/:id/done', (req, res) => {
+    const id = parseInt(req.params.id);
+    habits = habits.map(h => {
+        if (h.id === id) {
+            return { ...h, completed: true };
+        }
+        return h;
+    });
+    res.redirect('/');
 });
 
-// ====== delete 
-app.post('/delete/:id', (req, res) => {
+//  ==================================== edit.ejs
+app.get('/habit/:id/edit', (req, res) => {
+    const id = parseInt(req.params.id);
+    const habit = habits.find(h => h.id === id);
+    res.render('edit', { habit });
+});
+
+// edit habit
+app.post('/habit/:id/edit', (req, res) => {
+    const id = parseInt(req.params.id);
+    habits = habits.map(h => {
+        if (h.id === id) {
+            return {
+                ...h,
+                name: req.body.name
+            };
+        }
+        return h;
+    });
+    res.redirect('/');
+});
+
+// delete habit
+app.get('/habit/:id/delete', (req, res) => {
     const id = parseInt(req.params.id);
     habits = habits.filter(h => h.id !== id);
-    res.redirect('/manage');
+    res.redirect('/');
 });
 
 // =================== Start the server ========================
